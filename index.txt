@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+<meta charset="UTF-8">
+
+<meta name="keywords" content="сайт, мой">
+<meta name="description" content="краткое описание">
+<link rel="stylesheet" href="style.css">
+<title>Site 3</title>
+
+	
+		
+</head>
+
+<body>
+
+    <?php include 'db.php';
+    $servername="localhost";
+    $username="root";
+    $password="";
+$con= new mysqli($servername,$username,$password,"bdlab3"); 
+
+if(isset($_GET['end']))
+    {
+        mysqli_query($db,"DELETE FROM `num`"); 
+        mysqli_query($db,"DELETE FROM `cheice`");
+        mysqli_query($db,"DELETE FROM `ips`"); 
+        mysqli_query($db,"DELETE FROM `visits`"); 
+        
+	 } 
+ if(isset($_GET['del_tema']))//Удаление темы
+{
+    $c1=$_GET['name'];   
+    mysqli_query($db,"DELETE FROM `num` WHERE `name`='$c1'");
+    $c1=$_GET['id_tema'];
+    mysqli_query($db,"DELETE FROM `cheice` WHERE `id_tema`='$c1'");
+    mysqli_query($db,"DELETE FROM `ips` WHERE `id_tema`='$c1'");
+    mysqli_query($db,"DELETE FROM `visits` WHERE `id_tema`='$c1'");
+ }
+ 
+ if(isset($_GET['redact_tema']))//Изменение темы
+{  
+    $c1=$_GET['id_tema'];
+    $c3=$_GET['newtema'];
+    mysqli_query($db,"UPDATE  `num` SET `name`='$c3' WHERE `id_tema`='$c1'"); 
+ }
+
+ if(isset($_GET['addname']) and $_GET['aa']!="")//Добавление темы
+{ 
+    $e=$_GET['aa'];  
+    mysqli_query($db,"INSERT INTO `num` (`numer`, `name`) VALUES (0,'$e')"); 
+ }
+ if(isset($_GET['add']) and $_GET['aa']!="")//Добавление варианта
+{
+    $c2=$_GET['id_tema'];
+    $c1=$_GET['aa'];
+    
+    mysqli_query($db,"UPDATE  `num` SET `numer`=`numer`+1 WHERE `id_tema`='$c2'");
+    mysqli_query($db,"INSERT INTO `cheice` (`id_tema`, `name`) VALUES ('$c2','$c1')");
+ }
+ if(isset($_GET['redact']))//Изменить варианта
+{
+    $c1=$_GET['id'];
+    $c3=$_GET['new_checkbox'];
+    mysqli_query($db,"UPDATE  `cheice` SET `name`='$c3' WHERE `id`='$c1'"); 
+ }
+ if(isset($_GET['del']))//Удаление варианта
+{   
+    $c2=$_GET['id'];
+    $res=mysqli_query($db,"SELECT `id` FROM `cheice` WHERE `id`='$c2'");
+    $row=mysqli_fetch_assoc($res);
+    $a=$row['id'];
+    
+    mysqli_query($db,"UPDATE  `num` SET `numer`=`numer`-1 WHERE `numer`='$c2'");
+    mysqli_query($db,"DELETE FROM  `cheice` WHERE  `id`='$a'"); 
+
+ } 
+    
+
+    $sql="SELECT * FROM `num`";
+$result=$con->query($sql); 
+	if($result->num_rows>0) { 
+        while($row=$result->fetch_assoc())
+    {  
+        
+        echo '<br><form action="index.php" method="get">
+	'.$row['name'].'<input name="name" type="hidden"  value="'.$row['name'].'">
+    <input name="id_tema" type="hidden"  value="'.$row['id_tema'].'">
+    <input type="submit"name ="del_tema" value="Удалить тему">  
+    <input name="newtema" type="text"  value="'.$row['name'].'">
+    <input type="submit"name ="redact_tema" value="Изменить тему">
+    </form><br>';//Удаление и изменение темы
+
+////////Генерация Чекбоксов
+    $r=$row['id_tema']; 
+    $b=1;  
+    $sql="SELECT * FROM `cheice` WHERE `id_tema`='$r'";
+$result1=$con->query($sql); 
+	if($result1->num_rows>0) { 
+        while($row_cheice=$result1->fetch_assoc())
+	{   
+        echo '<form action="index.php" method="get">
+        <input name="'.$b.' "id="1"  type="checkbox" >'.$row_cheice['name'].'
+        <input name="id" type="hidden"  value="'.$row_cheice['id'].'">
+        <input type="submit"name ="del" value="Удалить">
+        <input name="new_checkbox" type="text"  value="'.$row_cheice['name'].'">
+        <input type="submit"name ="redact" value="Изменить">
+        </form><br>'; $b=$b+1;
+    }
+                            }
+   ///////////////
+    echo '<form action="index.php" method="get">
+    <input name="aa"   type="text" value="">
+    <input name="id_tema" type="hidden"  value="'.$row['id_tema'].'">
+	<input type="submit"name ="add" value="добавить вариант">
+    </form>______________________________________________________________________<br>'; 
+    }}
+    ?>
+    <br>
+    <form action="index.php" method="get"> 
+    <input name="aa"   type="text" value=""> 
+    <input type="submit"name ="addname" value="добавить тему">
+    </form><br> <?//Добавление темы ?>
+
+    
+
+    <form action="ind.php" method="get">
+	<input type="submit" value="Создать голосование">
+    </form>
+     
+    <p><form action="index.php" method="get">
+    <input type="submit"name ="end" value="УДАЛИТЬ ВСЕ ТЕМЫ">
+	</form><p>
+   
+</body>
+
+</html>
